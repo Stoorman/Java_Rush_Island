@@ -51,7 +51,7 @@
                         <id>default-cli</id>
                         <configuration>
                             <mainClass>
-                                com.javarush.NWA51.Poltavets.EntryPoint
+                                com.javarush.NWA51.Poltavets.island.EntryPoint
                             </mainClass>
                             <launcher>app</launcher>
                             <jlinkZipName>app</jlinkZipName>

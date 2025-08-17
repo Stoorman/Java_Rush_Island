@@ -1,4 +1,4 @@
-package com.javarush.NWA51.Poltavets.entity;
+package com.javarush.NWA51.Poltavets.island.entity;
 
 public abstract class Animals {
 
