@@ -15,4 +15,19 @@ public abstract class Animals {
     protected int sex;             // Пол животного
     protected int age;             // Возраст животного
 
+    public boolean isAlive() { // метод проверяющий живое ли животное
+        //TODO писать реализацию метода
+        return false;
+    }
+
+    public int[] run(int[] startPosition) {    //метод вычиляет позицию клетки, куда пойдёт животное
+        //TODO написать реализацию метода
+            return null;
+    }
+
+    public abstract
+
+
+
+
 }
