@@ -25,6 +25,7 @@ public class Cell {
         }
         this.grassMax = 200.0;        //  TODO прописать механизм смены количества травы в записимости от почвы
         this.grass = randomDouble(0.0, grassMax);
+        createAnimals();
         //  TODO генерация случайного количества животных в ячейке
     }
 
@@ -47,6 +48,9 @@ public class Cell {
         BigDecimal rounded = bdValue.divide(bdStep, 0, RoundingMode.HALF_UP)
                 .multiply(bdStep);
         return rounded.doubleValue();
+    }
+
+    private void createAnimals() {
     }
 
     public void print() {
