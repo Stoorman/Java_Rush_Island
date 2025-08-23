@@ -40,9 +40,4 @@ public abstract class Animals {
         // TODO дописать метод распечатки животного
     }
 
-
-
-
-
-
 }

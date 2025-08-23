@@ -87,21 +87,21 @@ public class Cell {
 //    }
 
 
-//    public void nextDayCell() {                                   //Действия при смене дня
-//        grassGrowt();        //рост травы
+    public void nextDayCell() {                                   //Действия при смене дня
+        grassGrowt();          //рост травы
 //        addAgeAnimals();     //прибавляется возраст животных
 //        animalHunger();      //снижение уровня сытости животных
 //        deleteDeadAnimals(); //удаляются мёртвые животные(голодные и старые)
 //        birthAnimals();      //рожаются новые животные
 //        predatorsHunt();     //хищники охотятся
 //        herbivoresEat();     //травоятные едят траву
-//    }
+    }
 
-//    public void grassGrowt() {
-//        grass += grassGrowth;
-//        if(grass >= grassMax)
-//            grass = 1.0*grassMax;}
-//    }
+    public void grassGrowt() {
+        grass += grassGrowth;
+        if(grass >= grassMax)
+            grass = 1.0*grassMax;}
+    }
 //
 //    private void addAgeAnimals() {
 //    }
