@@ -23,19 +23,20 @@ public class AnimalFactory {
             if (input == null) {
                 throw new IOException("Файл animals.prm не найден!");
             }
-            properties.load(input);                                                                            //закрузаем настройки потоком в объкт класса Properties
+            properties.load(input);                                                                            //загружаем настройки потоком в объект класса Properties
         }
         //TODO Вывести пути и сообщения об ошибке в переменные, их значения в отдельный файл
 
         for (String key : properties.stringPropertyNames()) {                                                 //Через цикл проходим все ключи в properties, а именно все названия классов животных
             String fullPath = BASE_PACKAGE + key;
 
-            Class<? extends Animals> clazz = (Class<? extends Animals>) Class.forName(fullPath);
-            String[] animalParameters = properties.getProperty(key).split(",");                  //Получаем параметры по ключу и разделяем их на массив разделителм ","
+            //Class<? extends Animals> clazz = (Class<? extends Animals>) Class.forName(fullPath);     // Так ругается, т.к. можем получить из файла класс не наследник Animals
+            Class<? extends Animals> clazz = Class.forName(fullPath).asSubclass(Animals.class);
+            String[] animalParameters = properties.getProperty(key).split(",");                  //Получаем параметры по ключу и разделяем их на массив разделитель ","
 
             //Создание классов через рефлексию
             List<Animals> list = new ArrayList<>();
-            int countAnimals = random.nextInt(Integer.parseInt(animalParameters[4]) + 1);       //Случайное количество животных, но не больше максимума
+            int countAnimals = random.nextInt(Integer.parseInt(animalParameters[5]) + 1);       //Случайное количество животных, но не больше максимума
             for (int i = 0; i < countAnimals; i++) {
                 Animals animal = clazz.getDeclaredConstructor(String[].class)
                         .newInstance((Object) animalParameters);

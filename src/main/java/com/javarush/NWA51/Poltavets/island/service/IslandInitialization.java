@@ -3,10 +3,6 @@ package com.javarush.NWA51.Poltavets.island.service;
 import com.javarush.NWA51.Poltavets.island.entity.Cell;
 import com.javarush.NWA51.Poltavets.island.service.dto.IslandConfigDTO;
 
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.util.Properties;
-
 public class IslandInitialization {
     private String nameIsland;
     private int xAxisSize;
@@ -21,6 +17,7 @@ public class IslandInitialization {
         for (int i = 0; i < xAxisSize; i++) {
             for (int j = 0; j < yAxisSize; j++) {
                 island[i][j] = new Cell(i,j,islandConfigDTO);
+
             }
         }
     }
@@ -36,7 +33,7 @@ public class IslandInitialization {
     }
 
 
-    //Далле отладочный код, который потом надо закомментить
+    //Далее отладочный код, который потом надо закомментить
 
 
 }
