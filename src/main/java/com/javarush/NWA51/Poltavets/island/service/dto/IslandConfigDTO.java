@@ -81,7 +81,7 @@ public class IslandConfigDTO {
 
     // Вложенный статический приватный класс. Каждый метод записвает значение переменной
     // и возвращает сам Builder, чтобы можно было при вызове строить цепочки методов
-    private static class Builder {
+    public static class Builder {
         private String nameIsland;
         private int xAxisSize;
         private int yAxisSize;

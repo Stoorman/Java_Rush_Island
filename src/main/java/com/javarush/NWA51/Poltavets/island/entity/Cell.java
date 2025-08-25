@@ -26,7 +26,7 @@ public class Cell {
             case 0, 1, 2, 3 -> this.soilType = parametersCell.getSoilType();
             default -> this.soilType = RandomValue.randomInt(0, 3);
         }
-        this.grass = RandomValue.randomDouble(0.0, grassMax * 1.0);
+
         switch (soilType) {                          //прописываем скорость роста травы и максимальное количество в зависимости от почвы
             case 0 -> {
                 this.grassGrowth = parametersCell.getGrassGrowthDesert();
@@ -45,6 +45,7 @@ public class Cell {
                 this.grassMax = parametersCell.getGrassMaxJungle();
             }
         }
+        this.grass = RandomValue.randomDouble(0.0, grassMax * 1.0);
         AnimalFactory animalFactory = new AnimalFactory();
         try {
             this.AnimalsMap = animalFactory.createAnimal();
@@ -55,7 +56,25 @@ public class Cell {
     }
 
     public void print() {
-        System.out.println(" X" + xAxis + " Y" + yAxis + " Тип почвы - " + soilType + ", Кол-во травы - " + grass);
+        StringBuilder sb = new StringBuilder();
+        sb.append("X=").append(xAxis)
+                .append(" Y=").append(yAxis)
+                .append(" | Тип почвы: ").append(soilType)
+                .append(" | Трава: ").append(String.format("%.1f", grass))
+                .append("/").append(grassMax)
+                .append(" | Животные: ");
+
+        if (AnimalsMap.isEmpty()) {
+            sb.append("нет");
+        } else {
+            for (Map.Entry<Class<? extends Animals>, List<Animals>> entry : AnimalsMap.entrySet()) {
+                String animalType = entry.getKey().getSimpleName();   // Название класса без пакета
+                int count = entry.getValue().size();                 // Количество
+                sb.append(animalType).append("=").append(count).append(" ");
+            }
+        }
+
+        System.out.println(sb.toString());
     }
 
 
@@ -99,6 +118,25 @@ public class Cell {
 //    private void herbivoresEat() {
 //    }
 
+    public Double getGrass() {
+        return grass;
+    }
+
+    public int getSoilType() {
+        return soilType;
+    }
+
+    public Cell[][] getIslands() {
+        return islands;
+    }
+
+    public Map<Class<? extends Animals>, Integer> getMaxNumberAnimalMap() {
+        return maxNumberAnimalMap;
+    }
+
+    public Map<Class<? extends Animals>, List<Animals>> getAnimalsMap() {
+        return AnimalsMap;
+    }
 }
 
 

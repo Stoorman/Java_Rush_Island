@@ -6,10 +6,11 @@ public abstract class Animals {
 
     //Константы
     protected String animalName;
-    protected int weight;          // Вес животного
+    protected Double weight;          // Вес животного
     protected Double fullnessSize; //Максимальная сытость
     protected Double hunger;       // голод или скорость убывания сытости
     protected int strokeMax;       // Длина хода максимальная
+    protected int valueMax;        // Максимальное количество в клетке
 
     protected int ageMax;          // Максимальный возраст животного
     protected int ageMin;          // Возраст до которого животное ребёнок
@@ -23,10 +24,11 @@ public abstract class Animals {
     protected Animals(String[] parametersAnimal){
         //параметры, которые задаются для всех животных вида
         this.animalName = parametersAnimal[0];
-        this.weight=Integer.parseInt(parametersAnimal[1]);
+        this.weight=Double.parseDouble(parametersAnimal[1]);
         this.fullnessSize=Double.parseDouble(parametersAnimal[2]);
         this.hunger=Double.parseDouble(parametersAnimal[3]);
         this.strokeMax=Integer.parseInt(parametersAnimal[4]);
+        this.valueMax= Integer.parseInt(parametersAnimal[5]);
         this.ageMax=Integer.parseInt(parametersAnimal[6]);
         this.ageMin=Integer.parseInt(parametersAnimal[7]);
         //случайные параметры
@@ -51,9 +53,13 @@ public abstract class Animals {
             return null;
     }
 
+
     public void print(){
         System.out.println("Вид - " + animalName + ", Вес - " + weight );
         // TODO дописать метод распечатки животного
     }
 
+    public int getValueMax() {
+        return valueMax;
+    }
 }

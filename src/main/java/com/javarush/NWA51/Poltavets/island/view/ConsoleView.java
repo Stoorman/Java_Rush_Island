@@ -1,5 +1,6 @@
 package com.javarush.NWA51.Poltavets.island.view;
 
+import com.javarush.NWA51.Poltavets.island.entity.Cell;
 import com.javarush.NWA51.Poltavets.island.entity.Result;
 
 import static com.javarush.NWA51.Poltavets.island.constants.ApplicationConstants.EXEPTION;
@@ -17,5 +18,10 @@ public class ConsoleView implements View {
             case OK -> System.out.println(SUCCESS);
             case ERROR -> System.out.println(EXEPTION + result.getApplicationException().getMessage());
         }
+    }
+
+    @Override
+    public void show(Cell[][] island) {
+
     }
 }

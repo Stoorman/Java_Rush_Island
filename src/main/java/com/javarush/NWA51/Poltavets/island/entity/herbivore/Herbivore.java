@@ -1,4 +1,8 @@
 package com.javarush.NWA51.Poltavets.island.entity.herbivore;
 
-public abstract class Herbivore implements GrassEater {
+import com.javarush.NWA51.Poltavets.island.entity.Animals;
+
+public abstract class Herbivore extends Animals implements GrassEater {
+
+    Herbivore(String[] parametersHerbivore) {super(parametersHerbivore);}
 }

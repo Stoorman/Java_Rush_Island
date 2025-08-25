@@ -22,6 +22,10 @@ public class IslandInitialization {
         }
     }
 
+    public Cell[][] getIsland(){
+        return island;
+    }
+
 
     public void print() {
         System.out.println("Название острова - " + nameIsland);

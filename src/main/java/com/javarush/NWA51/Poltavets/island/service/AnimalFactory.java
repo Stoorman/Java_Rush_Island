@@ -19,7 +19,7 @@ public class AnimalFactory {
         Random random = new Random();
 
         try (InputStream input = getClass().getClassLoader()                                                    //Создаём поток
-                .getResourceAsStream("com/javarush/NWA51/Poltavets/island/repository/animals.prm")) {     //Ищем файл в classpath
+                .getResourceAsStream("repository/animals.prm")) {     //Ищем файл в classpath
             if (input == null) {
                 throw new IOException("Файл animals.prm не найден!");
             }
