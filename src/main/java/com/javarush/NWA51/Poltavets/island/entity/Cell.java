@@ -1,14 +1,13 @@
 package com.javarush.NWA51.Poltavets.island.entity;
 
+import com.javarush.NWA51.Poltavets.island.entity.herbivore.GrassEater;
+import com.javarush.NWA51.Poltavets.island.entity.herbivore.Herbivore;
 import com.javarush.NWA51.Poltavets.island.service.AnimalFactory;
 import com.javarush.NWA51.Poltavets.island.service.RandomValue;
 import com.javarush.NWA51.Poltavets.island.service.SingleAnimalFactory;
 import com.javarush.NWA51.Poltavets.island.service.dto.IslandConfigDTO;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class Cell {
     private final int xAxis;                                                    //Координата ячейки по х
@@ -46,7 +45,7 @@ public class Cell {
                 this.grassMax = parametersCell.getGrassMaxJungle();
             }
         }
-        this.grass = RandomValue.randomDouble(0.0, grassMax * 1.0);
+        this.grass = RandomValue.randomDouble(0.0, grassMax * 1.0, 0.01);
         AnimalFactory animalFactory = new AnimalFactory();
         try {
             this.AnimalsMap = animalFactory.createAnimal();
@@ -74,8 +73,6 @@ public class Cell {
                 sb.append(animalType).append("=").append(count).append(" ");
             }
         }
-
-        System.out.println(sb.toString());
     }
 
     //Метод перемещает животных по ячейкам
@@ -133,7 +130,7 @@ public class Cell {
         for (Map.Entry<Class<? extends Animals>, List<Animals>> entry : AnimalsMap.entrySet()) { //Перебираем все классы животных
             List<Animals> animalList = entry.getValue(); //получаем список животных
             Iterator<Animals> iterator = animalList.iterator(); //итератор
-            List<Animals> tempAnimalList = new ArrayList<>(); //временный лист для новорожденных, т.к. во время иттерации добавить нельзя
+            List<Animals> tempAnimalList = new ArrayList<>(); //временный лист для новорожденных, т.к. во время итерации добавить нельзя
             while (iterator.hasNext()) { //перебираем пока есть следующий элемент
                 Animals animal = iterator.next(); //следующий элемент
                 animal.addAgeAnimals();  //прибавляем возраст
@@ -141,7 +138,6 @@ public class Cell {
                 if(!animal.isDead()) {     //если ещё живой, то продолжаем
                     if(animal.birthAnimals(animalList)) { //животное рожает?
                         tempAnimalList.add(new SingleAnimalFactory().createAnimal(animal.getClass()));  // добавляем новое животное (0 возраст) во временный лист
-
                     }
                 } else {
                     iterator.remove(); //удаляем мертвое животное
@@ -149,9 +145,23 @@ public class Cell {
             }
             animalList.addAll(tempAnimalList); // добавляем за пределами итератора из временного листа новорожденных
         }
+        //А теперь животные начинают жрать траву и друг друга
 
-//        predatorsHunt();     //хищники охотятся
-//        herbivoresEat();     //травоядные едят траву
+        // Травоядные едят траву
+        List<Animals> animalsListEat = new ArrayList<>();   //Список для всех животных
+        for (List<Animals> list : AnimalsMap.values()) {    // Перебираем все списки в карте
+            animalsListEat.addAll(list);                    // Сваливаем всех в кучу
+        }
+        Collections.shuffle(animalsListEat);                // Перемешиваем список
+        for (Animals animal : animalsListEat) {             // Теперь проходим весь список по порядку
+            if(animal instanceof GrassEater && grass > 0) {              // Если ест траву и трава есть
+                grass = ((GrassEater) animal).eatGrass(grass);          //возвращает остаток травы
+            }
+        }
+
+
+
+
     }
 
     public void grassGrowt() {
@@ -159,27 +169,6 @@ public class Cell {
         if(grass >= grassMax)
             grass = 1.0*grassMax;}
 
-
-
-//
-//    private void animalHunger() {
-//    }
-//
-//    private void deleteDeadAnimals() {
-//    }
-//
-//    private void birthAnimals() {
-//    }
-//
-//    private void predatorsHunt() {
-//    }
-//
-//    private void herbivoresEat() {
-//    }
-
-    public Double getGrass() {
-        return grass;
-    }
 
     public int getSoilType() {
         return soilType;

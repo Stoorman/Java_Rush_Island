@@ -8,8 +8,7 @@ public class RandomValue {
     private static Random random = new Random();
 
     //Метод генерирует случайное натуральное число(Double) [minValue...maxValue]
-    public static Double randomDouble(Double minValue, Double maxValue) {
-        double step = 0.05; // кратность округления
+    public static Double randomDouble(Double minValue, Double maxValue, Double step) {
         // Случайное число в диапазоне [minValue, maxValue)
         double rawValue = minValue + (maxValue - minValue) * random.nextDouble();
         // Округление к ближайшему шагу

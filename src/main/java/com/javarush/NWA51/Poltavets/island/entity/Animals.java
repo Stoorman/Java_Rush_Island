@@ -9,7 +9,7 @@ public abstract class Animals {
     //Константы
     private final String animalName;
     private final Double weight;          // Вес животного
-    private final Double fullnessSize; //Максимальная сытость
+    protected final Double fullnessSize; //Максимальная сытость
     private final Double hunger;       // голод или скорость убывания сытости
     private final int speed;       // Длина хода максимальная
     private final int valueMax;        // Максимальное количество в клетке
@@ -17,11 +17,11 @@ public abstract class Animals {
     private final int ageMax;          // Максимальный возраст животного
     private final int ageMin;          // Возраст до которого животное ребёнок
     private final boolean sex;         // Пол животного 0-M, 1-W
-    private final int probabilityOfBirth = 5;         // Вероятность рождения в процентах
+    private final int probabilityOfBirth;         // Вероятность рождения в процентах
 
 
     //Изменяемые или задаются при создании
-    private Double fullness;     // Сытость
+    protected Double fullness;     // Сытость
     private int age;             // Возраст животного
     private boolean isDead = false;
 
@@ -36,8 +36,9 @@ public abstract class Animals {
         this.valueMax= Integer.parseInt(parametersAnimal[5]);
         this.ageMax=Integer.parseInt(parametersAnimal[6]);
         this.ageMin=Integer.parseInt(parametersAnimal[7]);
+        this.probabilityOfBirth = Integer.parseInt(parametersAnimal[9]);
         //случайные параметры
-        this.fullness= RandomValue.randomDouble(hunger*2, fullnessSize);
+        this.fullness= RandomValue.randomDouble(hunger*2, fullnessSize, 0.01);
         this.sex = RandomValue.randomBoolean();
         if(Integer.parseInt(parametersAnimal[8])==1) {
             this.age = RandomValue.randomInt(0,ageMin);
@@ -90,4 +91,6 @@ public abstract class Animals {
     public int getAge() {return age;}
 
     public boolean getSex() {return sex;}
+
+    public Double getWeight() {return weight;}
 }
