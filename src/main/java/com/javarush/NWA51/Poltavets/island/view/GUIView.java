@@ -21,7 +21,6 @@ public class GUIView implements View {
     @Override
     public void show(Cell[][] island) {
         BorderPane root = new BorderPane();
-
         root.setCenter(gridRenderer.render(island));
         root.setRight(infoPanel.render("Ява", island.length, island[0].length));
 
@@ -38,6 +37,7 @@ public class GUIView implements View {
 
     @Override
     public void printResult(Result result) {
-
+        // TODO
     }
 }
+

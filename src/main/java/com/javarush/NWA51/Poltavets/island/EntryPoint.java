@@ -19,9 +19,9 @@ public class EntryPoint extends Application {
 
                 .soilType(4)
                 .grassDesert(50, 200)
-                .grassForest(50, 400)
-                .grassJungle(50, 1000)
-                .grassSavvanna(50, 600)
+                .grassForest(150, 400)
+                .grassJungle(600, 1000)
+                .grassSavvanna(300, 600)
                 .build();
 
         // Инициализация острова
@@ -31,6 +31,8 @@ public class EntryPoint extends Application {
         // Отображение через GUIView
         GUIView guiView = new GUIView(stage);
         guiView.show(island);
+
+        island[0][0].runAnimals(island);
     }
 
     public static void main(String[] args) {

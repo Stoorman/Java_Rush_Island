@@ -4,6 +4,9 @@ import com.javarush.NWA51.Poltavets.island.entity.Animals;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.Reader;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 
 public class AnimalFactory {
@@ -18,12 +21,14 @@ public class AnimalFactory {
         Properties properties = new Properties();                                                               //Класс для хранения настроек
         Random random = new Random();
 
-        try (InputStream input = getClass().getClassLoader()                                                    //Создаём поток
-                .getResourceAsStream("repository/animals.prm")) {     //Ищем файл в classpath
+        try (InputStream input = getClass().getClassLoader()     //Создаём поток
+                .getResourceAsStream("repository/animals.prm");    //Ищем файл в classpath
+             Reader reader = new InputStreamReader(input, StandardCharsets.UTF_8)) {    //Читаем в UTF-8
+
             if (input == null) {
                 throw new IOException("Файл animals.prm не найден!");
             }
-            properties.load(input);                                                                            //загружаем настройки потоком в объект класса Properties
+            properties.load(reader);  //загружаем настройки потоком в объект класса Properties
         }
         //TODO Вывести пути и сообщения об ошибке в переменные, их значения в отдельный файл
 

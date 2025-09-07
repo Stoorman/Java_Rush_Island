@@ -29,6 +29,13 @@ public class RandomValue {
     public static boolean randomBoolean() {
         return random.nextBoolean();
     }
+    //Метод генерирует случайный вектор, [1,1]- значит идём вправо вверх
+    public static int[] randomVector() {
+        int xAxis = randomInt(-1, 1);
+        int yAxis = randomInt(-1, 1);
+
+        return new int[]{xAxis, yAxis};
+    }
 
 
 

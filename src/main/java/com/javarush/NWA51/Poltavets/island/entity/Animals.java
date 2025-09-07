@@ -2,32 +2,37 @@ package com.javarush.NWA51.Poltavets.island.entity;
 
 import com.javarush.NWA51.Poltavets.island.service.RandomValue;
 
+import java.util.List;
+
 public abstract class Animals {
 
     //Константы
-    protected String animalName;
-    protected Double weight;          // Вес животного
-    protected Double fullnessSize; //Максимальная сытость
-    protected Double hunger;       // голод или скорость убывания сытости
-    protected int strokeMax;       // Длина хода максимальная
-    protected int valueMax;        // Максимальное количество в клетке
+    private final String animalName;
+    private final Double weight;          // Вес животного
+    private final Double fullnessSize; //Максимальная сытость
+    private final Double hunger;       // голод или скорость убывания сытости
+    private final int speed;       // Длина хода максимальная
+    private final int valueMax;        // Максимальное количество в клетке
 
-    protected int ageMax;          // Максимальный возраст животного
-    protected int ageMin;          // Возраст до которого животное ребёнок
+    private final int ageMax;          // Максимальный возраст животного
+    private final int ageMin;          // Возраст до которого животное ребёнок
+    private final boolean sex;         // Пол животного 0-M, 1-W
+    private final int probabilityOfBirth = 5;         // Вероятность рождения в процентах
+
 
     //Изменяемые или задаются при создании
-    protected Double fullness;     // Сытость
-    protected boolean sex;         // Пол животного
-    protected int age;             // Возраст животного
+    private Double fullness;     // Сытость
+    private int age;             // Возраст животного
+    private boolean isDead = false;
 
 
     protected Animals(String[] parametersAnimal){
         //параметры, которые задаются для всех животных вида
-        this.animalName = parametersAnimal[0];
+        this.animalName = parametersAnimal[0] + RandomValue.randomInt(0,10000);
         this.weight=Double.parseDouble(parametersAnimal[1]);
         this.fullnessSize=Double.parseDouble(parametersAnimal[2]);
         this.hunger=Double.parseDouble(parametersAnimal[3]);
-        this.strokeMax=Integer.parseInt(parametersAnimal[4]);
+        this.speed=Integer.parseInt(parametersAnimal[4]);
         this.valueMax= Integer.parseInt(parametersAnimal[5]);
         this.ageMax=Integer.parseInt(parametersAnimal[6]);
         this.ageMin=Integer.parseInt(parametersAnimal[7]);
@@ -42,24 +47,47 @@ public abstract class Animals {
 
 
     }
+    //Методы следующего дня
 
-    public boolean isAlive() { // метод проверяющий живое ли животное
-        //TODO писать реализацию метода
+    //Прибавляем возраст
+    public void addAgeAnimals() {
+        age++;
+        if(age > ageMax) {
+            isDead = true;  //умирает от старости
+        }
+    }
+
+    //Убавляем сытость
+    public void animalHunger() {
+        fullness = fullness-hunger;
+        if(fullness < 0) {
+            isDead = true;
+        }
+    }
+
+    //Рождаются новые животные
+    public boolean birthAnimals(List<Animals> animalsList){
+        if(sex && age>=ageMin) {   // проверяем пол(W) и возраст
+            for (Animals animals : animalsList) {
+                if (!animals.getSex() && animals.getAge()>=ageMin && RandomValue.randomInt(0,100)<=probabilityOfBirth) {
+                    //ищет в списке M подходящего возраста, а затем случайным образом происходит рождение
+                    return true;
+                }
+            }
+        }
         return false;
     }
 
-    public int[] run(int[] startPosition) {    //метод вычисляет позицию клетки, куда пойдёт животное
-        //TODO написать реализацию метода
-            return null;
-    }
+    //Геттеры
+    public String getAnimalName() {return animalName;}
 
+    public int getValueMax() {return valueMax;}
 
-    public void print(){
-        System.out.println("Вид - " + animalName + ", Вес - " + weight );
-        // TODO дописать метод распечатки животного
-    }
+    public int getSpeed() {return speed;}
 
-    public int getValueMax() {
-        return valueMax;
-    }
+    public boolean isDead() {return isDead;}
+
+    public int getAge() {return age;}
+
+    public boolean getSex() {return sex;}
 }

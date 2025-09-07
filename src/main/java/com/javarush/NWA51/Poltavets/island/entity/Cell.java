@@ -2,20 +2,21 @@ package com.javarush.NWA51.Poltavets.island.entity;
 
 import com.javarush.NWA51.Poltavets.island.service.AnimalFactory;
 import com.javarush.NWA51.Poltavets.island.service.RandomValue;
+import com.javarush.NWA51.Poltavets.island.service.SingleAnimalFactory;
 import com.javarush.NWA51.Poltavets.island.service.dto.IslandConfigDTO;
 
+import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
 public class Cell {
-    private int xAxis;                                                    //Координата ячейки по х
-    private int yAxis;                                                    //Координата ячейки по y
+    private final int xAxis;                                                    //Координата ячейки по х
+    private final int yAxis;                                                    //Координата ячейки по y
     private Double grass;                                                 //Количество травы в ячейке
     private int grassMax;                                                 //Максимальное количество травы в ячейке
-    private int grassGrowth;                                              //Скорость роста травы в процентах в сутки
-    private int soilType;                                                 //Тип почвы
-    private Cell[][] islands;                                             //Копия острова для перемещения
-    private Map<Class<? extends Animals>, Integer> maxNumberAnimalMap;    //Карта класс - max кол-во в ячейке
+    private int grassGrowth;                                              //Скорость роста травы в сутки
+    private final int soilType;                                                 //Тип почвы
     private Map<Class<? extends Animals>, List<Animals>> AnimalsMap;      //Карта класс - Список животных этого класса
 
 
@@ -77,21 +78,80 @@ public class Cell {
         System.out.println(sb.toString());
     }
 
+    //Метод перемещает животных по ячейкам
+   public void runAnimals(Cell[][] islands) {
+       for (Map.Entry<Class<? extends Animals>, List<Animals>> entry : AnimalsMap.entrySet()) { //Перебираем все классы животных
+           List<Animals> animalList = entry.getValue(); //получаем список животных
+           Iterator<Animals> iterator = animalList.iterator(); //итератор
+           while (iterator.hasNext()) { //перебираем пока есть следующий элемент
+               Animals animal = iterator.next(); //следующий элемент
+               //Определяем новые координаты
+               int newXAxis = xAxis;
+               int newYAxis = yAxis;
+               int xAxisMax = islands.length;
+               int yAxisMax = islands[0].length;
+               int buffer = 0;
+               if(animal.getSpeed()>0) {  //двигаемся, если скорость >0
+                   for (int i = 0; i < animal.getSpeed(); i++) { //при каждом перемещении выбираем направление движения
+                       int[] vector = RandomValue.randomVector();
+                       if (vector[0] != 0 || vector[1] != 0) {
+                           buffer = newXAxis;
+                           newXAxis = newXAxis + vector[0];
+                           if (newXAxis >= xAxisMax || newXAxis < 0) { //Проверяем на выход за границы массива
+                               newXAxis = buffer;
+                           }
+                           buffer = newYAxis;
+                           newYAxis = newYAxis + vector[1];
+                           if (newYAxis >= yAxisMax || newYAxis < 0) {
+                               newYAxis = buffer;
+                           }
+                       }
+                       //   System.out.println(animal.getAnimalName()+ " X=" +newXAxis + " Y=" +newYAxis);
+                   }
+               }
+               if (islands[newXAxis][newYAxis].getNumbersOfAnimals(animal.getClass()) < animal.getValueMax() && (xAxis != newXAxis || yAxis !=newYAxis)){
+                   //Если кол-во животных этого типа меньше макс кол-ва животных и целевая ячейка не совпадает с текущей, то переносим животное в целевую ячейку
+                   islands[newXAxis][newYAxis].addAnimal(animal); // добавляем животное в целевую ячейку
+                   System.out.println(animal.getAnimalName() + " переходит из ячейки X=" + xAxis + " Y=" +yAxis + " в ячейку X=" + newXAxis + " Y=" + newYAxis);
+                   iterator.remove(); //удаляем животное их текущей ячейки
+               }
+           }
+       }
+    }
 
-//    public Cell[][] runAnimals(Cell[][] Islands) {         //Метод перемещает животных по ячейкам
-//        // TODO написать реализацию перемещения животных
-//        return null;
-//    }
+    //Добавление животного в ячейку
+    public void addAnimal(Animals animal) {
+        //Class<? extends Animals> animalType = animal.getClass(); //какой класс у животного
+        //List<Animals> animalsList = AnimalsMap.get(animalType);  //ищем список по ключу
+        //animalsList.add(animal); //добавляем в список животное
+        AnimalsMap.get(animal.getClass()).add(animal); //короткая запись
+    }
 
 
-    public void nextDayCell() {                                   //Действия при смене дня
+    public void nextDayCell() throws Exception{                                   //Действия при смене дня
         grassGrowt();          //рост травы
-//        addAgeAnimals();     //прибавляется возраст животных
-//        animalHunger();      //снижение уровня сытости животных
-//        deleteDeadAnimals(); //удаляются мёртвые животные(голодные и старые)
-//        birthAnimals();      //рожаются новые животные
+        for (Map.Entry<Class<? extends Animals>, List<Animals>> entry : AnimalsMap.entrySet()) { //Перебираем все классы животных
+            List<Animals> animalList = entry.getValue(); //получаем список животных
+            Iterator<Animals> iterator = animalList.iterator(); //итератор
+            List<Animals> tempAnimalList = new ArrayList<>(); //временный лист для новорожденных, т.к. во время иттерации добавить нельзя
+            while (iterator.hasNext()) { //перебираем пока есть следующий элемент
+                Animals animal = iterator.next(); //следующий элемент
+                animal.addAgeAnimals();  //прибавляем возраст
+                animal.animalHunger();   //проголодался
+                if(!animal.isDead()) {     //если ещё живой, то продолжаем
+                    if(animal.birthAnimals(animalList)) { //животное рожает?
+                        tempAnimalList.add(new SingleAnimalFactory().createAnimal(animal.getClass()));  // добавляем новое животное (0 возраст) во временный лист
+
+                    }
+                } else {
+                    iterator.remove(); //удаляем мертвое животное
+                }
+            }
+            animalList.addAll(tempAnimalList); // добавляем за пределами итератора из временного листа новорожденных
+        }
+
 //        predatorsHunt();     //хищники охотятся
-//        herbivoresEat();     //травоятные едят траву
+//        herbivoresEat();     //травоядные едят траву
     }
 
     public void grassGrowt() {
@@ -99,9 +159,8 @@ public class Cell {
         if(grass >= grassMax)
             grass = 1.0*grassMax;}
 
-//
-//    private void addAgeAnimals() {
-//    }
+
+
 //
 //    private void animalHunger() {
 //    }
@@ -126,17 +185,14 @@ public class Cell {
         return soilType;
     }
 
-    public Cell[][] getIslands() {
-        return islands;
-    }
-
-    public Map<Class<? extends Animals>, Integer> getMaxNumberAnimalMap() {
-        return maxNumberAnimalMap;
+    public int getNumbersOfAnimals(Class<? extends Animals> animalType) {
+        return AnimalsMap.get(animalType).size();
     }
 
     public Map<Class<? extends Animals>, List<Animals>> getAnimalsMap() {
         return AnimalsMap;
     }
 }
+
 
 

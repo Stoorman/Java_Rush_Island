@@ -4,7 +4,7 @@ import com.javarush.NWA51.Poltavets.island.entity.Animals;
 
 public abstract class Predator extends Animals implements AnimalEater {
 
-    Predator(String[] parametersPredator) {
-        super(parametersPredator);
+    Predator(String[] parameters) {
+        super(parameters);
     }
 }

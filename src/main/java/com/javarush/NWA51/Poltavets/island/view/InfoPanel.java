@@ -15,3 +15,5 @@ public class InfoPanel {
         return box;
     }
 }
+
+
