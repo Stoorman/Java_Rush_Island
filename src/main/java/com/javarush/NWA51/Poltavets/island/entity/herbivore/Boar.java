@@ -1,7 +1,8 @@
 package com.javarush.NWA51.Poltavets.island.entity.herbivore;
 
-public class Boar extends Herbivore{
+import com.javarush.NWA51.Poltavets.island.entity.predator.AnimalEater;
+
+public class Boar extends Herbivore implements AnimalEater {
     public Boar(String[] parameters) {super(parameters);}
 }
 
-// TODO Кабан может есть мышей гусениц

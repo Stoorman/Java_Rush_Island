@@ -1,7 +1,9 @@
 package com.javarush.NWA51.Poltavets.island.entity.herbivore;
 
-public class Duck extends Herbivore{
+import com.javarush.NWA51.Poltavets.island.entity.predator.AnimalEater;
+
+public class Duck extends Herbivore implements AnimalEater {
     public Duck (String[] parameters) {super(parameters);}
 }
 
-// TODO Не забыть, что утка есть гусениц
+

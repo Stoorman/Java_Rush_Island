@@ -1,10 +1,11 @@
 package com.javarush.NWA51.Poltavets.island.entity.herbivore;
 
-public class Mouse extends Herbivore{
+import com.javarush.NWA51.Poltavets.island.entity.predator.AnimalEater;
+
+public class Mouse extends Herbivore implements AnimalEater {
 
     public Mouse(String[] parameters) {
         super(parameters);
     }
 }
 
-// TODO Мышь может есть гусениц

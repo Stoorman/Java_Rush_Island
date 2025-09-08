@@ -23,7 +23,7 @@ public abstract class Animals {
     //Изменяемые или задаются при создании
     protected Double fullness;     // Сытость
     private int age;             // Возраст животного
-    private boolean isDead = false;
+    protected boolean isDead = false;
 
 
     protected Animals(String[] parametersAnimal){
@@ -77,6 +77,17 @@ public abstract class Animals {
             }
         }
         return false;
+    }
+
+    //Это хищник съел жертву
+    public void kill() {
+        isDead = true;
+    }
+
+    //Увеличение сытости
+    public void addFullness(double foodWeight) {
+        this.fullness = Math.min(this.fullness + foodWeight, this.fullnessSize);
+        // тут защита от переполнения сытости
     }
 
     //Геттеры

@@ -2,40 +2,34 @@ package com.javarush.NWA51.Poltavets.island.service;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.util.Random;
+import java.util.concurrent.ThreadLocalRandom;
 
 public class RandomValue {
-    private static Random random = new Random();
 
-    //Метод генерирует случайное натуральное число(Double) [minValue...maxValue]
+    //Метод генерирует случайное число Double [minValue...maxValue] с шагом step
     public static Double randomDouble(Double minValue, Double maxValue, Double step) {
-        // Случайное число в диапазоне [minValue, maxValue)
-        double rawValue = minValue + (maxValue - minValue) * random.nextDouble();
-        // Округление к ближайшему шагу
-        BigDecimal bdValue = BigDecimal.valueOf(rawValue);   //TODO посмотреть BigDecimal и RoundingMode
+        double rawValue = minValue + (maxValue - minValue) * ThreadLocalRandom.current().nextDouble();
+        BigDecimal bdValue = BigDecimal.valueOf(rawValue);
         BigDecimal bdStep = BigDecimal.valueOf(step);
         BigDecimal rounded = bdValue.divide(bdStep, 0, RoundingMode.HALF_UP)
                 .multiply(bdStep);
         return rounded.doubleValue();
     }
 
-    //Метод генерирует случайное целое число(int) [minValue...maxValue]
+    //Метод генерирует случайное целое число int [minValue...maxValue]
     public static int randomInt(int minValue, int maxValue) {
-        return random.nextInt(maxValue - minValue + 1) + minValue;
+        return ThreadLocalRandom.current().nextInt(minValue, maxValue + 1);
     }
 
-    //Метод генерирует случайное двоичное число(boolean)
+    //Метод генерирует случайное двоичное число boolean
     public static boolean randomBoolean() {
-        return random.nextBoolean();
+        return ThreadLocalRandom.current().nextBoolean();
     }
-    //Метод генерирует случайный вектор, [1,1]- значит идём вправо вверх
+
+    //Метод генерирует случайный вектор [-1,0,1] по каждой оси
     public static int[] randomVector() {
         int xAxis = randomInt(-1, 1);
         int yAxis = randomInt(-1, 1);
-
         return new int[]{xAxis, yAxis};
     }
-
-
-
 }
