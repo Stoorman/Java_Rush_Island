@@ -10,7 +10,7 @@ import com.javarush.NWA51.Poltavets.island.service.dto.IslandConfigDTO;
 import java.util.*;
 
 public class Cell {
-    private final int xAxis;                                                    // Координата ячейки по х
+    private final int xAxis;                                                    // Координата ячейки по x
     private final int yAxis;                                                    // Координата ячейки по y
     private Double grass;                                                       // Количество травы в ячейке
     private int grassMax;                                                       // Максимальное количество травы в ячейке
@@ -21,63 +21,47 @@ public class Cell {
     public Cell(int xAxis, int yAxis, IslandConfigDTO parametersCell) {
         this.xAxis = xAxis;
         this.yAxis = yAxis;
-        switch (parametersCell.getSoilType()) {  // прописывается почва или генерируется случайно
+
+        // Присваиваем тип почвы или случайно генерируем
+        switch (parametersCell.getSoilType()) {
             case 0, 1, 2, 3 -> this.soilType = parametersCell.getSoilType();
             default -> this.soilType = RandomValue.randomInt(0, 3);
         }
 
-        switch (soilType) {  // прописываем скорость роста травы и максимальное количество в зависимости от почвы
-            case 0 -> {
-                this.grassGrowth = parametersCell.getGrassGrowthDesert();
-                this.grassMax = parametersCell.getGrassMaxDesert();
-            }
-            case 1 -> {
-                this.grassGrowth = parametersCell.getGrassGrowthForest();
-                this.grassMax = parametersCell.getGrassMaxForest();
-            }
-            case 2 -> {
-                this.grassGrowth = parametersCell.getGrassGrowthSavvanna();
-                this.grassMax = parametersCell.getGrassMaxSavvanna();
-            }
-            case 3 -> {
-                this.grassGrowth = parametersCell.getGrassGrowthJungle();
-                this.grassMax = parametersCell.getGrassMaxJungle();
-            }
+        // Настройка роста травы и максимума в зависимости от типа почвы
+        switch (soilType) {
+            case 0 -> { this.grassGrowth = parametersCell.getGrassGrowthDesert(); this.grassMax = parametersCell.getGrassMaxDesert(); }
+            case 1 -> { this.grassGrowth = parametersCell.getGrassGrowthForest(); this.grassMax = parametersCell.getGrassMaxForest(); }
+            case 2 -> { this.grassGrowth = parametersCell.getGrassGrowthSavvanna(); this.grassMax = parametersCell.getGrassMaxSavvanna(); }
+            case 3 -> { this.grassGrowth = parametersCell.getGrassGrowthJungle(); this.grassMax = parametersCell.getGrassMaxJungle(); }
         }
+
+        // Инициализация количества травы
         this.grass = RandomValue.randomDouble(0.0, grassMax * 1.0, 0.01);
-        AnimalFactory animalFactory = new AnimalFactory(); //создаём фабрику животных
+
+        // Создаём фабрику животных и генерируем животных для ячейки
+        AnimalFactory animalFactory = new AnimalFactory();
         try {
-            this.AnimalsMap = animalFactory.createAnimal();  //получаем сгенерированую карту животных
+            this.AnimalsMap = animalFactory.createAnimal();
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
     }
 
-    public void print() {
-        StringBuilder sb = new StringBuilder();
-        sb.append("X=").append(xAxis)
-                .append(" Y=").append(yAxis)
-                .append(" | Тип почвы: ").append(soilType)
-                .append(" | Трава: ").append(String.format("%.1f", grass))
-                .append("/").append(grassMax)
-                .append(" | Животные: ");
-
-        if (AnimalsMap.isEmpty()) {
-            sb.append("нет");
-        } else {
-            for (Map.Entry<Class<? extends Animals>, List<Animals>> entry : AnimalsMap.entrySet()) {
-                String animalType = entry.getKey().getSimpleName();
-                int count = entry.getValue().size();
-                sb.append(animalType).append("=").append(count).append(" ");
+    // Сброс флагов движения животных в начале дня
+    public void resetRunFlags() {
+        for (List<Animals> list : AnimalsMap.values()) {
+            for (Animals animal : list) {
+                animal.setRun(false);
             }
         }
     }
 
-    // Метод перемещает животных по ячейкам
+    // Перемещение животных по острову
     public void runAnimals(Cell[][] islands) {
         for (Map.Entry<Class<? extends Animals>, List<Animals>> entry : AnimalsMap.entrySet()) {
             List<Animals> animalList = entry.getValue();
-            Iterator<Animals> iterator = animalList.iterator(); //перебираем через итератор
+            Iterator<Animals> iterator = animalList.iterator(); // перебираем животных через итератор
             while (iterator.hasNext()) {
                 Animals animal = iterator.next();
                 int newXAxis = xAxis;
@@ -86,11 +70,12 @@ public class Cell {
                 int yAxisMax = islands[0].length;
                 int buffer;
 
-                if (animal.getSpeed() > 0) {   //Если может двигаться
-                    for (int i = 0; i < animal.getSpeed(); i++) { //то случайно выбираем направление движения для каждого хода
+                // Если животное может двигаться и ещё не двигалось
+                if (animal.getSpeed() > 0 && !animal.isRun()) {
+                    for (int i = 0; i < animal.getSpeed(); i++) {
                         int[] vector = RandomValue.randomVector();
-                        if (vector[0] != 0 || vector[1] != 0) {  //тут защита от выхода за пределы массива
-                            buffer = newXAxis;                   //если выходим за пределы, то остаёмся на месте
+                        if (vector[0] != 0 || vector[1] != 0) {
+                            buffer = newXAxis;
                             newXAxis = newXAxis + vector[0];
                             if (newXAxis >= xAxisMax || newXAxis < 0) newXAxis = buffer;
 
@@ -101,12 +86,14 @@ public class Cell {
                     }
                 }
 
-                if (islands[newXAxis][newYAxis].getNumbersOfAnimals(animal.getClass()) < animal.getValueMax()    //смотрим еть ли место в целевой ячейке
-                        && (xAxis != newXAxis || yAxis != newYAxis)) {                                           //целевая яцейка не является текущей
-                    islands[newXAxis][newYAxis].addAnimal(animal);                                               //значит добавляем
-                    System.out.println(animal.getAnimalName() + " переходит из ячейки X=" + xAxis + " Y=" + yAxis +
-                            " в ячейку X=" + newXAxis + " Y=" + newYAxis);
-                    iterator.remove();                                                                        //даляем из текущей
+                // Перемещаем животное, если целевая ячейка не переполнена
+                if ((xAxis != newXAxis || yAxis != newYAxis) &&
+                        islands[newXAxis][newYAxis].getNumbersOfAnimals(animal.getClass()) < animal.getValueMax()) {
+                    islands[newXAxis][newYAxis].addAnimal(animal);
+                    animal.setRun(true);
+                    System.out.println(animal.getAnimalName() + " 🐾 переместился из X=" + xAxis + ", Y=" + yAxis +
+                            " в X=" + newXAxis + ", Y=" + newYAxis);
+                    iterator.remove(); // удаляем из текущей ячейки
                 }
             }
         }
@@ -117,76 +104,98 @@ public class Cell {
         AnimalsMap.get(animal.getClass()).add(animal);
     }
 
-    // Удаляем всех мёртвых животных из клетки
-    private void removeDeadAnimals() {
+    // Удаляем всех мёртвых животных из клетки и возвращаем их количество
+    private int removeDeadAnimals() {
+        int count = 0;
         for (List<Animals> list : AnimalsMap.values()) {
-            list.removeIf(Animals::isDead);
+            Iterator<Animals> iterator = list.iterator();
+            while (iterator.hasNext()) {
+                Animals a = iterator.next();
+                if (a.isDead()) {
+                    System.out.println("☠ " + a.getAnimalName() + " умер в клетке X=" + xAxis + ", Y=" + yAxis);
+                    iterator.remove();
+                    count++;
+                }
+            }
         }
+        return count;
     }
 
-    //Рост травы
+    // Рост травы в ячейке
     public void grassGrowt() {
         grass += grassGrowth;
-        if (grass >= grassMax) grass = 1.0 * grassMax; //если перешли за максимум, то опускаем до максимума
+        if (grass >= grassMax) grass = 1.0 * grassMax;
     }
 
-    public void nextDayCell() throws Exception {  // Действия при смене дня
+    // Полный цикл действий клетки за день
+    // Возвращает массив: [родилось, умерло] для статистики по острову
+    public int[] nextDayCell() throws Exception {
         grassGrowt(); // рост травы
 
-        // Возраст, голод и рождение
+        int birthCount = 0;
+
+        // Еда и охота
+        List<Animals> animalsListEat = new ArrayList<>();
+        for (List<Animals> list : AnimalsMap.values()) animalsListEat.addAll(list);
+        Collections.shuffle(animalsListEat);
+
+        // Едят траву
+        for (Animals animal : animalsListEat) {
+            if (animal instanceof GrassEater && grass > 0) {
+                double before = grass;
+                grass = ((GrassEater) animal).eatGrass(grass);
+                System.out.println("🌿 " + animal.getAnimalName() + " съел траву: " + (before - grass) +
+                        " в клетке X=" + xAxis + ", Y=" + yAxis);
+            }
+        }
+
+        // Охота
+        for (Animals animal : animalsListEat) {
+            if (animal instanceof AnimalEater) {
+                ((AnimalEater) animal).hunt(animalsListEat, this);
+            }
+        }
+
+        // Возраст, голод и рождение животных
         for (Map.Entry<Class<? extends Animals>, List<Animals>> entry : AnimalsMap.entrySet()) {
             List<Animals> animalList = entry.getValue();
             List<Animals> tempAnimalList = new ArrayList<>();
 
             for (Animals animal : animalList) {
-                animal.addAgeAnimals();
-                animal.animalHunger();
+                animal.addAgeAnimals();   // возраст
+                animal.animalHunger();    // голод
 
+                // Рождение животных
                 if (!animal.isDead() && animal.birthAnimals(animalList)) {
-                    tempAnimalList.add(new SingleAnimalFactory().createAnimal(animal.getClass()));
+                    Animals child = new SingleAnimalFactory().createAnimal(animal.getClass());
+                    tempAnimalList.add(child);
+                    birthCount++;
+                    System.out.println("👶 Родился " + child.getAnimalName() + " в клетке X=" + xAxis + ", Y=" + yAxis);
                 }
             }
             animalList.addAll(tempAnimalList);
         }
 
-        // Убираем мёртвых после голода и старости
-        removeDeadAnimals();
+        // Удаляем всех мёртвых животных и считаем их количество
+        int deadCount = removeDeadAnimals();
 
-        //Список всех животных для еды и охоты
-        List<Animals> animalsListEat = new ArrayList<>();
-        for (List<Animals> list : AnimalsMap.values()) {
-            animalsListEat.addAll(list);
-        }
-        Collections.shuffle(animalsListEat);
+        // Вывод статистики по клетке
+        int totalAnimals = 0;
+        for (List<Animals> list : AnimalsMap.values()) totalAnimals += list.size();
 
-        // Травоядные едят траву
-        for (Animals animal : animalsListEat) {
-            if (animal instanceof GrassEater && grass > 0) {
-                grass = ((GrassEater) animal).eatGrass(grass);
-            }
-        }
+        System.out.println("Статистика клетки X=" + xAxis + ", Y=" + yAxis + ": " +
+                "Всего животных=" + totalAnimals +
+                ", Родилось=" + birthCount +
+                ", Умерло=" + deadCount +
+                ", Трава=" + grass);
 
-        // Хищники охотятся на животных
-        for (Animals animal : animalsListEat) {
-            if (animal instanceof AnimalEater) {
-                ((AnimalEater) animal).hunt(animalsListEat);
-            }
-        }
-
-        // Убираем дохлых после охоты
-        removeDeadAnimals();
+        return new int[]{birthCount, deadCount};
     }
 
-    public int getSoilType() {
-        return soilType;
-    }
-    //Скольеко животных этого класса в ячейке
-    public int getNumbersOfAnimals(Class<? extends Animals> animalType) {
-        return AnimalsMap.get(animalType).size();
-    }
-
-    //Какие животный сейчас в ячейке
-    public Map<Class<? extends Animals>, List<Animals>> getAnimalsMap() {
-        return AnimalsMap;
-    }
+    public int getSoilType() {return soilType;}
+    public double getGrass() {return grass;}
+    public int getXAxis() {return xAxis;}
+    public int getYAxis() {return yAxis;}
+    public int getNumbersOfAnimals(Class<? extends Animals> animalType) {return AnimalsMap.get(animalType).size();}
+    public Map<Class<? extends Animals>, List<Animals>> getAnimalsMap() {return AnimalsMap;}
 }

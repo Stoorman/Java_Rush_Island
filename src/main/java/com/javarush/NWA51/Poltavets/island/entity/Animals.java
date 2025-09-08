@@ -23,7 +23,8 @@ public abstract class Animals {
     //Изменяемые или задаются при создании
     protected Double fullness;     // Сытость
     private int age;             // Возраст животного
-    protected boolean isDead = false;
+    protected boolean isDead = false; //умер?
+    protected boolean isRun = false;  // флаг, который говорит, ходило животное или нет
 
 
     protected Animals(String[] parametersAnimal){
@@ -80,9 +81,12 @@ public abstract class Animals {
     }
 
     //Это хищник съел жертву
-    public void kill() {
-        isDead = true;
-    }
+    public void kill() {isDead = true;}
+
+    //Задаёт флаг ходило животное или нет
+    public void setRun(boolean isRun) {this.isRun = isRun;}
+
+    public boolean isRun() {return isRun;}
 
     //Увеличение сытости
     public void addFullness(double foodWeight) {

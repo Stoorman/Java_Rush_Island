@@ -17,6 +17,7 @@ public abstract class Herbivore extends Animals implements GrassEater {
         }
         fullness += eatenGrass;
         grass -= eatenGrass;
+        if(grass<0)  grass=0.0;
 
         return grass;
     }

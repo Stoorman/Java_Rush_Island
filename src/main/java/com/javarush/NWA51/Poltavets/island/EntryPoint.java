@@ -1,6 +1,5 @@
 package com.javarush.NWA51.Poltavets.island;
 
-import com.javarush.NWA51.Poltavets.island.app.ApplicationIsland;
 import com.javarush.NWA51.Poltavets.island.controller.MainController;
 import com.javarush.NWA51.Poltavets.island.view.GUIView;
 import javafx.application.Application;
@@ -17,17 +16,15 @@ public class EntryPoint extends Application {
         MainController mainController = new MainController(guiView);
         guiView.setMainController(mainController);
 
-        // Создаём ApplicationIsland и запускаем первичную инициализацию
-        ApplicationIsland applicationIsland = new ApplicationIsland(mainController);
-        applicationIsland.start();
+        // Показываем окно настроек перед запуском симуляции
+        guiView.showSettingsWindow(() -> {
+            // После того как пользователь подтвердил настройки, запускаем остров
+            mainController.initIsland();
+            mainController.showIsland();
+        });
     }
 
     public static void main(String[] args) {
         launch(args);
     }
 }
-
-
-
-
-

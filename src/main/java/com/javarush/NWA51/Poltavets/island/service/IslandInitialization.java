@@ -25,19 +25,4 @@ public class IslandInitialization {
     public Cell[][] getIsland(){
         return island;
     }
-
-
-    public void print() {
-        System.out.println("Название острова - " + nameIsland);
-        for (Cell[] c : island) {
-            for (Cell z : c) {
-                z.print();
-            }
-        }
-    }
-
-
-    //Далее отладочный код, который потом надо закомментить
-
-
 }

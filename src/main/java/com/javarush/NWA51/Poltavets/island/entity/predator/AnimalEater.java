@@ -1,6 +1,7 @@
 package com.javarush.NWA51.Poltavets.island.entity.predator;
 
 import com.javarush.NWA51.Poltavets.island.entity.Animals;
+import com.javarush.NWA51.Poltavets.island.entity.Cell;
 import com.javarush.NWA51.Poltavets.island.repository.EatingProbability;
 import com.javarush.NWA51.Poltavets.island.service.RandomValue;
 
@@ -9,24 +10,22 @@ import java.util.Map;
 
 public interface AnimalEater {
 
-    // Метод охоты
-    default void hunt(List<Animals> animalsInCell) {
-        // Получаем карту вероятностей для данного хищника: кого и с какой вероятностью он может съесть
+    // Метод охоты с логированием
+    default void hunt(List<Animals> animalsInCell, Cell cell) {
         Map<Class<? extends Animals>, Integer> preyMap = EatingProbability.TABLE.get(this.getClass());
+        if (preyMap == null) return; // Этот хищник никого не ест
 
-        if (preyMap == null) {
-            return; // Этот вид никого не ест
-        }
+        for (Animals prey : animalsInCell) {
+            if (prey.isDead()) continue;
 
-        for (Animals prey : animalsInCell) {        // Перебираем всех потенциальных жертв
-            if (prey.isDead()) continue;            // Пропускаем дохлых
-
-            Integer probability = preyMap.get(prey.getClass());   // Берем вероятность съесть конкретного животного
-            // Используем многопоточный RandomValue для проверки вероятности по таблице
+            Integer probability = preyMap.get(prey.getClass());
             if (probability != null && RandomValue.randomInt(0, 100) < probability) {
-                ((Animals)this).addFullness(prey.getWeight());   // Прибавляем сытость хищника на вес жертвы
-                prey.kill(); // Убиваем жертву
-                break;       // После удачной охоты прекращаем искать дальше
+                ((Animals)this).addFullness(prey.getWeight());
+                prey.kill(); // помечаем жертву как мёртвую
+                System.out.println("🐺 " + ((Animals)this).getAnimalName() +
+                        " съел 🐇 " + prey.getAnimalName() +
+                        " в X=" + cell.getXAxis() + " Y=" + cell.getYAxis());
+                break; // удачная охота завершает поиск
             }
         }
     }
