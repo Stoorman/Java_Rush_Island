@@ -18,6 +18,9 @@ public class Cell {
     private final int soilType;                                                 // Тип почвы
     private Map<Class<? extends Animals>, List<Animals>> AnimalsMap;           // Карта класс - Список животных этого класса
 
+    private int bornTotal = 0;                                                 // Всего родилось животных в клетке
+    private int deadTotal = 0;                                                 // Всего умерло животных в клетке
+
     public Cell(int xAxis, int yAxis, IslandConfigDTO parametersCell) {
         this.xAxis = xAxis;
         this.yAxis = yAxis;
@@ -61,7 +64,7 @@ public class Cell {
     public void runAnimals(Cell[][] islands) {
         for (Map.Entry<Class<? extends Animals>, List<Animals>> entry : AnimalsMap.entrySet()) {
             List<Animals> animalList = entry.getValue();
-            Iterator<Animals> iterator = animalList.iterator(); // перебираем животных через итератор
+            Iterator<Animals> iterator = animalList.iterator();
             while (iterator.hasNext()) {
                 Animals animal = iterator.next();
                 int newXAxis = xAxis;
@@ -93,7 +96,7 @@ public class Cell {
                     animal.setRun(true);
                     System.out.println(animal.getAnimalName() + " 🐾 переместился из X=" + xAxis + ", Y=" + yAxis +
                             " в X=" + newXAxis + ", Y=" + newYAxis);
-                    iterator.remove(); // удаляем из текущей ячейки
+                    iterator.remove();
                 }
             }
         }
@@ -128,7 +131,6 @@ public class Cell {
     }
 
     // Полный цикл действий клетки за день
-    // Возвращает массив: [родилось, умерло] для статистики по острову
     public int[] nextDayCell() throws Exception {
         grassGrowt(); // рост травы
 
@@ -179,6 +181,10 @@ public class Cell {
         // Удаляем всех мёртвых животных и считаем их количество
         int deadCount = removeDeadAnimals();
 
+        // Обновляем суммарную статистику
+        bornTotal += birthCount;
+        deadTotal += deadCount;
+
         // Вывод статистики по клетке
         int totalAnimals = 0;
         for (List<Animals> list : AnimalsMap.values()) totalAnimals += list.size();
@@ -192,11 +198,16 @@ public class Cell {
         return new int[]{birthCount, deadCount};
     }
 
-    public int getSoilType() {return soilType;}
-    public double getGrass() {return grass;}
-    public int getGrassMax() {return grassMax;}
-    public int getXAxis() {return xAxis;}
-    public int getYAxis() {return yAxis;}
-    public int getNumbersOfAnimals(Class<? extends Animals> animalType) {return AnimalsMap.get(animalType).size();}
-    public Map<Class<? extends Animals>, List<Animals>> getAnimalsMap() {return AnimalsMap;}
+    // Геттеры
+    public int getSoilType() { return soilType; }
+    public double getGrass() { return grass; }
+    public int getGrassMax() { return grassMax; }
+    public int getXAxis() { return xAxis; }
+    public int getYAxis() { return yAxis; }
+    public int getNumbersOfAnimals(Class<? extends Animals> animalType) { return AnimalsMap.get(animalType).size(); }
+    public Map<Class<? extends Animals>, List<Animals>> getAnimalsMap() { return AnimalsMap; }
+
+    // Методы для получения суммарной статистики
+    public int getBornTotal() { return bornTotal; }
+    public int getDeadTotal() { return deadTotal; }
 }
