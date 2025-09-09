@@ -22,9 +22,9 @@ public interface AnimalEater {
             if (probability != null && RandomValue.randomInt(0, 100) < probability) {
                 ((Animals)this).addFullness(prey.getWeight());
                 prey.kill(); // помечаем жертву как мёртвую
-                System.out.println("🐺 " + ((Animals)this).getAnimalName() +
-                        " съел 🐇 " + prey.getAnimalName() +
-                        " в X=" + cell.getXAxis() + " Y=" + cell.getYAxis());
+               // System.out.println("🐺 " + ((Animals)this).getAnimalName() +
+               //         " съел 🐇 " + prey.getAnimalName() +
+                //        " в X=" + cell.getXAxis() + " Y=" + cell.getYAxis());
                 break; // удачная охота завершает поиск
             }
         }

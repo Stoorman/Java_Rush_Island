@@ -2,8 +2,8 @@
 nameIsland=Ява
 
 # Размеры острова по осям
-xAxisSize=15
-yAxisSize=10
+xAxisSize=45
+yAxisSize=30
 
 # Тип почвы (0 - пустыня, 1 - лес, 2 - саванна, 3 - джунгли, 4 - случайно)
 soilType=4

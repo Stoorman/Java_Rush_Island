@@ -94,8 +94,8 @@ public class Cell {
                         islands[newXAxis][newYAxis].getNumbersOfAnimals(animal.getClass()) < animal.getValueMax()) {
                     islands[newXAxis][newYAxis].addAnimal(animal);
                     animal.setRun(true);
-                    System.out.println(animal.getAnimalName() + " 🐾 переместился из X=" + xAxis + ", Y=" + yAxis +
-                            " в X=" + newXAxis + ", Y=" + newYAxis);
+                  //  System.out.println(animal.getAnimalName() + " 🐾 переместился из X=" + xAxis + ", Y=" + yAxis +
+                  //          " в X=" + newXAxis + ", Y=" + newYAxis);
                     iterator.remove();
                 }
             }
@@ -115,7 +115,7 @@ public class Cell {
             while (iterator.hasNext()) {
                 Animals a = iterator.next();
                 if (a.isDead()) {
-                    System.out.println("☠ " + a.getAnimalName() + " умер в клетке X=" + xAxis + ", Y=" + yAxis);
+                //    System.out.println("☠ " + a.getAnimalName() + " умер в клетке X=" + xAxis + ", Y=" + yAxis);
                     iterator.remove();
                     count++;
                 }
@@ -146,8 +146,8 @@ public class Cell {
             if (animal instanceof GrassEater && grass > 0) {
                 double before = grass;
                 grass = ((GrassEater) animal).eatGrass(grass);
-                System.out.println("🌿 " + animal.getAnimalName() + " съел траву: " + (before - grass) +
-                        " в клетке X=" + xAxis + ", Y=" + yAxis);
+             //   System.out.println("🌿 " + animal.getAnimalName() + " съел траву: " + (before - grass) +
+             //           " в клетке X=" + xAxis + ", Y=" + yAxis);
             }
         }
 
@@ -172,7 +172,7 @@ public class Cell {
                     Animals child = new SingleAnimalFactory().createAnimal(animal.getClass());
                     tempAnimalList.add(child);
                     birthCount++;
-                    System.out.println("👶 Родился " + child.getAnimalName() + " в клетке X=" + xAxis + ", Y=" + yAxis);
+                //    System.out.println("👶 Родился " + child.getAnimalName() + " в клетке X=" + xAxis + ", Y=" + yAxis);
                 }
             }
             animalList.addAll(tempAnimalList);

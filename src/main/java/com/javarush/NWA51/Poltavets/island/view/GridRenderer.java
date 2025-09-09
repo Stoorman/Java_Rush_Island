@@ -34,6 +34,15 @@ public class GridRenderer {
     private VBox cellInfoBox;
     private StackPane overlayPane;
 
+    // ------------------ Новое: общие статистики ------------------
+    private HBox dailyStatsBox;
+    private Text totalAnimalsText;
+    private Text bornTodayText;
+    private Text deadTodayText;
+
+    // ------------------ Новое: выделение ячейки ------------------
+    private Rectangle selectedCellRect;
+
     private final Map<String, String> animalEmojiMap = Map.ofEntries(
             entry("Медведь", "🐻"), entry("Орёл", "🦅"), entry("Лиса", "🦊"), entry("Удав", "🐍"),
             entry("Волк", "🐺"), entry("Кабан", "🐗"), entry("Буйвол", "🐃"), entry("Гусеница", "🐛"),
@@ -75,8 +84,10 @@ public class GridRenderer {
                 rect.setOnMouseClicked(e -> {
                     if (finalX >= 0 && finalX < cols && finalY >= 0 && finalY < rows) {
                         showCellInfo(island[finalY][finalX]);
+                        highlightCell(rect);
                     } else {
                         showSeaInfo();
+                        clearHighlight();
                     }
                 });
 
@@ -140,6 +151,7 @@ public class GridRenderer {
 
         Node infoPanel = new InfoPanel().render(islandName, width, height);
 
+        // ------------------ Кнопка "Новый день" ------------------
         Button nextDayButton = new Button("Новый день");
         nextDayButton.setOnAction(e -> showNewDayOverlay(onNextDay));
 
@@ -148,7 +160,19 @@ public class GridRenderer {
         topBox.setPadding(new Insets(10));
         topBox.getChildren().addAll(infoPanel, nextDayButton, radioGrid);
 
-        VBox islandWithLegend = new VBox(10, overlayPane, legend);
+        // ------------------ Общая статистика ------------------
+        totalAnimalsText = new Text();
+        bornTodayText = new Text();
+        deadTodayText = new Text();
+        totalAnimalsText.setStyle("-fx-font-size: 14; -fx-font-weight: bold;");
+        bornTodayText.setStyle("-fx-font-size: 14; -fx-font-weight: bold;");
+        deadTodayText.setStyle("-fx-font-size: 14; -fx-font-weight: bold;");
+
+        dailyStatsBox = new HBox(20, totalAnimalsText, bornTodayText, deadTodayText);
+        dailyStatsBox.setAlignment(Pos.CENTER);
+        dailyStatsBox.setPadding(new Insets(10));
+
+        VBox islandWithLegend = new VBox(10, overlayPane, legend, dailyStatsBox);
         islandWithLegend.setAlignment(Pos.TOP_CENTER);
 
         HBox centerHBox = new HBox(10, islandWithLegend, scrollPane);
@@ -159,6 +183,9 @@ public class GridRenderer {
         root.setTop(topBox);
         root.setCenter(centerHBox);
 
+        // ------------------ Обновляем статистику сразу при отрисовке ------------------
+        updateDailyStats();
+
         return root;
     }
 
@@ -168,7 +195,6 @@ public class GridRenderer {
         notification.setStyle("-fx-background-color: rgba(255, 255, 224, 0.9); -fx-padding: 15; -fx-background-radius: 10;");
         notification.setAlignment(Pos.CENTER);
 
-        // Символ дня/солнца вместо эмодзи
         Text text = new Text("Новый день наступает!");
         text.setStyle("-fx-font-size: 18; -fx-font-weight: bold; -fx-font-family: 'Segoe UI';");
         notification.getChildren().add(text);
@@ -179,9 +205,41 @@ public class GridRenderer {
         PauseTransition pauseBeforeUpdate = new PauseTransition(Duration.millis(300));
         pauseBeforeUpdate.setOnFinished(e -> {
             onNextDay.run();
+            updateDailyStats(); // <--- обновляем статистику
             overlayPane.getChildren().remove(notification);
         });
         pauseBeforeUpdate.play();
+    }
+
+    // ------------------ Обновление статистики по всему острову ------------------
+    private void updateDailyStats() {
+        int total = 0, born = 0, dead = 0;
+        for (Cell[] row : island) {
+            for (Cell cell : row) {
+                total += cell.getAnimalsMap().values().stream().mapToInt(List::size).sum();
+                born += cell.getBornTotal();
+                dead += cell.getDeadTotal();
+            }
+        }
+        totalAnimalsText.setText("Всего животных: " + total);
+        bornTodayText.setText("👶 Родилось: " + born);
+        deadTodayText.setText("☠ Умерло: " + dead);
+    }
+
+    // ------------------ Выделение ячейки ------------------
+    private void highlightCell(Rectangle rect) {
+        clearHighlight(); // снимаем старое выделение
+        selectedCellRect = rect;
+        rect.setStroke(Color.RED);
+        rect.setStrokeWidth(2);
+    }
+
+    private void clearHighlight() {
+        if (selectedCellRect != null) {
+            selectedCellRect.setStroke(Color.BLACK);
+            selectedCellRect.setStrokeWidth(0.2);
+            selectedCellRect = null;
+        }
     }
 
     // ------------------ Остальные методы ------------------

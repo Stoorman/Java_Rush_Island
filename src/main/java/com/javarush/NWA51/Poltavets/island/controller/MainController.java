@@ -8,7 +8,6 @@ import com.javarush.NWA51.Poltavets.island.service.dto.IslandConfigDTO;
 import com.javarush.NWA51.Poltavets.island.view.View;
 import javafx.application.Platform;
 
-import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.List;
@@ -20,7 +19,7 @@ public class MainController {
 
     private final View view;
     private Cell[][] island;
-    private static final int THREADS = 7;
+    private static final int THREADS = 8;
 
     private final String defaultIslandPath = "src/main/resources/repository/islandDefault.prm";
     private final String defaultAnimalsPath = "src/main/resources/repository/animalsDefault.prm";
@@ -33,7 +32,6 @@ public class MainController {
 
     public void initIsland() {
         try {
-            // Если пользовательские файлы существуют — используем их
             if (!Files.exists(Paths.get(userIslandPath))) {
                 Files.copy(Paths.get(defaultIslandPath), Paths.get(userIslandPath));
             }
@@ -41,9 +39,7 @@ public class MainController {
                 Files.copy(Paths.get(defaultAnimalsPath), Paths.get(userAnimalsPath));
             }
 
-            // Загружаем настройки острова
             IslandConfigDTO configDTO = IslandConfigLoader.loadConfig(userIslandPath);
-
             island = new IslandInitialization(configDTO).getIsland();
 
         } catch (Exception e) {
@@ -66,6 +62,14 @@ public class MainController {
             }
         }
 
+        // Этап 1: перемещение животных в одном потоке
+        for (Cell[] row : island) {
+            for (Cell cell : row) {
+                cell.runAnimals(island);
+            }
+        }
+
+        // Этап 2: обработка клеток параллельно (травы, еда, охота, рождение, смерть)
         ExecutorService executor = Executors.newFixedThreadPool(THREADS);
         int rowsPerThread = (int) Math.ceil((double) island.length / THREADS);
 
@@ -77,7 +81,6 @@ public class MainController {
                 for (int i = startRow; i < endRow; i++) {
                     for (Cell cell : island[i]) {
                         try {
-                            cell.runAnimals(island);
                             cell.nextDayCell();
                         } catch (Exception e) {
                             e.printStackTrace();
@@ -94,6 +97,7 @@ public class MainController {
             e.printStackTrace();
         }
 
+        // Сбор общей статистики
         int totalAnimals = 0;
         double totalGrass = 0;
         int totalBorn = 0;
@@ -101,17 +105,12 @@ public class MainController {
 
         for (Cell[] row : island) {
             for (Cell cell : row) {
-                try {
-                    int[] stats = cell.nextDayCell();
-                    totalBorn += stats[0];
-                    totalDead += stats[1];
+                totalBorn += cell.getBornTotal();
+                totalDead += cell.getDeadTotal();
+                totalGrass += cell.getGrass();
 
-                    for (List<Animals> list : cell.getAnimalsMap().values()) {
-                        totalAnimals += list.size();
-                    }
-                    totalGrass += cell.getGrass();
-                } catch (Exception e) {
-                    e.printStackTrace();
+                for (List<Animals> list : cell.getAnimalsMap().values()) {
+                    totalAnimals += list.size();
                 }
             }
         }
