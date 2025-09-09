@@ -8,6 +8,7 @@ public abstract class Animals {
 
     //Константы
     private final String animalName;
+    private final String animalTypeName; //тип животного
     private final Double weight;          // Вес животного
     protected final Double fullnessSize; //Максимальная сытость
     private final Double hunger;       // голод или скорость убывания сытости
@@ -30,6 +31,7 @@ public abstract class Animals {
     protected Animals(String[] parametersAnimal){
         //параметры, которые задаются для всех животных вида
         this.animalName = parametersAnimal[0] + RandomValue.randomInt(0,10000);
+        this.animalTypeName = parametersAnimal[0];
         this.weight=Double.parseDouble(parametersAnimal[1]);
         this.fullnessSize=Double.parseDouble(parametersAnimal[2]);
         this.hunger=Double.parseDouble(parametersAnimal[3]);
@@ -108,4 +110,7 @@ public abstract class Animals {
     public boolean getSex() {return sex;}
 
     public Double getWeight() {return weight;}
+
+    public String getAnimalTypeName() {return animalTypeName;}
+
 }

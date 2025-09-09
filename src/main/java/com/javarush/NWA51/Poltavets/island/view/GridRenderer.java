@@ -5,6 +5,7 @@ import com.javarush.NWA51.Poltavets.island.entity.Cell;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
+import javafx.scene.control.Button;
 import javafx.scene.control.RadioButton;
 import javafx.scene.control.ToggleGroup;
 import javafx.scene.layout.*;
@@ -23,10 +24,10 @@ public class GridRenderer {
 
     private Cell[][] island;
     private GridPane grid;
-    private VBox legend;
+    private HBox legend;
     private Map<String, Color> animalColors;
 
-    public Node render(Cell[][] island) {
+    public Node render(Cell[][] island, String islandName, int width, int height, Runnable onNextDay) {
         this.island = island;
         int rows = island.length;
         int cols = island[0].length;
@@ -40,70 +41,96 @@ public class GridRenderer {
                 Rectangle rect = new Rectangle(CELL_SIZE, CELL_SIZE);
                 rect.setStroke(Color.BLACK);
                 rect.setStrokeWidth(0.2);
-                grid.add(rect, y + SEA_WIDTH, x + SEA_WIDTH); // поменяли местами x и y
+                grid.add(rect, y + SEA_WIDTH, x + SEA_WIDTH);
 
-                // Собираем все типы животных для легенды
                 if (x >= 0 && x < cols && y >= 0 && y < rows) {
                     Cell cell = island[y][x];
-                    for (Class<? extends Animals> animalClass : cell.getAnimalsMap().keySet()) {
-                        animalColors.putIfAbsent(animalClass.getSimpleName(),
-                                Color.color(Math.random(), Math.random(), Math.random()));
+                    for (Map.Entry<Class<? extends Animals>, List<Animals>> entry : cell.getAnimalsMap().entrySet()) {
+                        List<Animals> animals = entry.getValue();
+                        if (!animals.isEmpty()) {
+                            String animalName = animals.get(0).getAnimalTypeName();
+                            animalColors.putIfAbsent(animalName, Color.GREEN);
+                        }
                     }
                 }
             }
         }
 
         StackPane gridContainer = new StackPane(grid);
-        gridContainer.setAlignment(Pos.CENTER);
 
-        // Стиль для кириллицы
         String fontStyle = "-fx-font-family: 'Segoe UI'; -fx-font-size: 14;";
 
-        // Радиокнопки для выбора режима окраски
+        // Радиокнопки в два ряда
         ToggleGroup toggleGroup = new ToggleGroup();
-        RadioButton rbSoil = new RadioButton("Тип почвы");
-        rbSoil.setToggleGroup(toggleGroup);
-        rbSoil.setSelected(true);
-        rbSoil.setStyle(fontStyle);
+        RadioButton rbBiome = new RadioButton("Биом");
+        rbBiome.setToggleGroup(toggleGroup);
+        rbBiome.setSelected(true);
+        rbBiome.setStyle(fontStyle);
 
-        VBox controls = new VBox(5, rbSoil);
-        controls.setAlignment(Pos.CENTER_LEFT);
-        controls.setPadding(new Insets(10));
-        controls.setStyle(fontStyle);
+        GridPane radioGrid = new GridPane();
+        radioGrid.setHgap(20);
+        radioGrid.setVgap(5);
+        radioGrid.setAlignment(Pos.CENTER);
+        radioGrid.add(rbBiome, 0, 0);
 
-        // Добавляем радио-кнопки для всех животных
+        int col = 1, row = 0;
+        int maxCols = (int) Math.ceil((animalColors.size() + 1) / 2.0);
+
         for (String animalName : animalColors.keySet()) {
             RadioButton rb = new RadioButton(animalName);
             rb.setToggleGroup(toggleGroup);
             rb.setStyle(fontStyle);
-            controls.getChildren().add(rb);
+            radioGrid.add(rb, col, row);
+            col++;
+            if (col >= maxCols) {
+                col = 0;
+                row++;
+            }
         }
 
-        // Легенда
-        legend = new VBox(5);
-        legend.setAlignment(Pos.CENTER_LEFT);
+        // Легенда радиокнопок — горизонтальная под островом
+        legend = new HBox(10);
+        legend.setAlignment(Pos.CENTER);
         legend.setPadding(new Insets(10));
         legend.setStyle(fontStyle);
 
         toggleGroup.selectedToggleProperty().addListener((obs, oldV, newV) -> updateGrid(toggleGroup));
-
-        // Первичная отрисовка
         updateGrid(toggleGroup);
 
-        HBox root = new HBox(20, gridContainer, new VBox(controls, legend));
-        root.setAlignment(Pos.CENTER);
+        // Информация об острове
+        Node infoPanel = new InfoPanel().render(islandName, width, height);
+
+        // Кнопка "Новый день"
+        Button nextDayButton = new Button("Новый день");
+        nextDayButton.setOnAction(e -> onNextDay.run());
+
+        // Верхний блок: информация + кнопка + радиокнопки
+        VBox topBox = new VBox(10);
+        topBox.setAlignment(Pos.CENTER);
+        topBox.setPadding(new Insets(10));
+        topBox.getChildren().addAll(infoPanel, nextDayButton, radioGrid);
+
+        // Центрируем остров и легенду по горизонтали
+        VBox islandWithLegend = new VBox(10, gridContainer, legend);
+        islandWithLegend.setAlignment(Pos.TOP_CENTER);
+
+        HBox centerHBox = new HBox(islandWithLegend);
+        centerHBox.setAlignment(Pos.TOP_CENTER); // горизонтальный центр
+        centerHBox.setPadding(new Insets(0, 0, 10, 0));
+
+        BorderPane root = new BorderPane();
+        root.setTop(topBox);
+        root.setCenter(centerHBox);
 
         return root;
     }
 
     private void updateGrid(ToggleGroup toggleGroup) {
-        String selected = toggleGroup.getSelectedToggle() instanceof RadioButton rb ? rb.getText() : "Тип почвы";
+        String selected = toggleGroup.getSelectedToggle() instanceof RadioButton rb ? rb.getText() : "Биом";
         legend.getChildren().clear();
 
         int rows = island.length;
         int cols = island[0].length;
-
-        Color animalColor = Color.RED;
 
         for (int x = -SEA_WIDTH; x < cols + SEA_WIDTH; x++) {
             for (int y = -SEA_WIDTH; y < rows + SEA_WIDTH; y++) {
@@ -113,30 +140,27 @@ public class GridRenderer {
                     Cell cell = island[y][x];
                     Color color;
 
-                    if ("Тип почвы".equals(selected)) {
+                    if ("Биом".equals(selected)) {
                         color = getColorForSoil(cell.getSoilType());
                     } else {
-                        List<Animals> animals = cell.getAnimalsMap().getOrDefault(
-                                cell.getAnimalsMap().keySet().stream()
-                                        .filter(c -> c.getSimpleName().equals(selected))
-                                        .findFirst().orElse(null),
-                                List.of()
-                        );
+                        List<Animals> animals = cell.getAnimalsMap().values().stream()
+                                .filter(list -> !list.isEmpty() && list.get(0).getAnimalTypeName().equals(selected))
+                                .findFirst()
+                                .orElse(List.of());
 
                         int count = animals.size();
                         int max = animals.isEmpty() ? 1 : animals.get(0).getValueMax();
-                        animalColor = animalColors.getOrDefault(selected, Color.RED);
-                        color = getColorForAnimals(count, max, animalColor);
+                        Color baseColor = animalColors.getOrDefault(selected, Color.GREEN);
+                        color = getColorForAnimals(count, max, baseColor);
                     }
                     rect.setFill(color);
                 } else {
-                    rect.setFill(Color.LIGHTBLUE); // море
+                    rect.setFill(Color.LIGHTBLUE);
                 }
             }
         }
 
-        // Построение легенды
-        if ("Тип почвы".equals(selected)) {
+        if ("Биом".equals(selected)) {
             legend.getChildren().addAll(
                     createLegendItem(Color.SANDYBROWN, "Пустыня"),
                     createLegendItem(Color.FORESTGREEN, "Лес"),
@@ -144,14 +168,13 @@ public class GridRenderer {
                     createLegendItem(Color.DARKGREEN, "Джунгли")
             );
         } else {
-            // легенда для животных
-            Color baseColor = animalColors.getOrDefault(selected, Color.RED);
+            Color baseColor = animalColors.getOrDefault(selected, Color.GREEN);
             legend.getChildren().addAll(
-                    createLegendItem(getColorForAnimals(0,1,baseColor), "0%"),
-                    createLegendItem(getColorForAnimals(1,4,baseColor), "25%"),
-                    createLegendItem(getColorForAnimals(2,4,baseColor), "50%"),
-                    createLegendItem(getColorForAnimals(3,4,baseColor), "75%"),
-                    createLegendItem(getColorForAnimals(4,4,baseColor), "100%")
+                    createLegendItem(getColorForAnimals(0, 1, baseColor), "0%"),
+                    createLegendItem(getColorForAnimals(1, 4, baseColor), "25%"),
+                    createLegendItem(getColorForAnimals(2, 4, baseColor), "50%"),
+                    createLegendItem(getColorForAnimals(3, 4, baseColor), "75%"),
+                    createLegendItem(getColorForAnimals(4, 4, baseColor), "100%")
             );
         }
     }
@@ -179,7 +202,7 @@ public class GridRenderer {
         Text text = new Text(label);
         text.setStyle("-fx-font-family: 'Segoe UI'; -fx-font-size: 14;");
         HBox item = new HBox(5, rect, text);
-        item.setAlignment(Pos.CENTER_LEFT);
+        item.setAlignment(Pos.CENTER);
         return item;
     }
 

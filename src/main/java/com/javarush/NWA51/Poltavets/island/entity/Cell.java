@@ -194,6 +194,7 @@ public class Cell {
 
     public int getSoilType() {return soilType;}
     public double getGrass() {return grass;}
+    public int getGrassMax() {return grassMax;}
     public int getXAxis() {return xAxis;}
     public int getYAxis() {return yAxis;}
     public int getNumbersOfAnimals(Class<? extends Animals> animalType) {return AnimalsMap.get(animalType).size();}
